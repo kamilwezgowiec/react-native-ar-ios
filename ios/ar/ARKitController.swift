@@ -1,10 +1,3 @@
-//
-//  ARKitController.swift
-//  clearabee
-//
-//  Created by Kamil Wezgowiec on 07/10/2021.
-//
-
 import UIKit
 import ARKit
 
@@ -21,10 +14,7 @@ class ARKitController: UIViewController {
     //MARK: - Life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("changed view :)")
-        // Show statistics such as fps and timing information
-        // self.sceneView.showsStatistics = true
-        // self.sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints]
+
         self.addTapGesture()
         self.addPinchGesture()
         self.addRotationGesture()
@@ -41,8 +31,6 @@ class ARKitController: UIViewController {
         self.sceneView.session.pause()
     }
 
-    //MARK: - Methods
-
     func addBox(x: Float, y: Float, z: Float) {
         let box = SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0)
         let material = SCNMaterial()
@@ -53,8 +41,6 @@ class ARKitController: UIViewController {
         self.node = SCNNode()
         self.node.geometry = box
         self.node.position = SCNVector3(x, y, z)
-        //Positive x is to the right. Negative x is to the left. Positive y is up. Negative y is down. Positive z is backward. Negative z is forward.
-        //A node represents the position and the coordinates of an object in a 3D space. By itself, the node has no visible content.
 
         sceneView.scene.rootNode.addChildNode(self.node)
     }
@@ -116,10 +102,8 @@ class ARKitController: UIViewController {
     @objc func didRotate(_ gesture: UIRotationGestureRecognizer) {
         switch gesture.state {
         case .changed:
-            // change node y angel
             self.node.eulerAngles.y = self.lastRotation + Float(gesture.rotation)
         case .ended:
-            // save last rotation
             self.lastRotation += Float(gesture.rotation)
         default:
             break

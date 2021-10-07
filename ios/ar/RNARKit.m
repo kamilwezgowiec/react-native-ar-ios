@@ -2,6 +2,6 @@
 
 @interface RCT_EXTERN_MODULE(RNARKit, NSObject)
 
-RCT_EXTERN_METHOD(open:(NSDictionary *)options)
+RCT_EXTERN_METHOD(show)
 
 @end
