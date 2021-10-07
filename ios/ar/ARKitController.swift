@@ -2,17 +2,17 @@ import UIKit
 import ARKit
 
 class ARKitController: UIViewController {
-    //MARK: - IBOutlets
     @IBOutlet weak var sceneView: ARSCNView!
     @IBOutlet weak var spawnLabel: UILabel!
-  
-    //MARK: - Variables
+    @IBOutlet weak var widthLabel: UILabel!
+    @IBOutlet weak var heightLabel: UILabel!
+    @IBOutlet weak var depthLabel: UILabel!
+
     private let configuration = ARWorldTrackingConfiguration()
     private var node: SCNNode!
     private var lastRotation: Float = 0
     private var initialCenter = CGPoint()
 
-    //MARK: - Life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -63,10 +63,12 @@ class ARKitController: UIViewController {
 
         guard let node = self.node else {
             spawnLabel.isHidden = true
-          
-            self.addBox(x: translation.x, y: translation.y, z: translation.z)
+
+            addBox(x: translation.x, y: translation.y, z: translation.z)
+            updateDimensionLabels()
             return
         }
+
         node.position = SCNVector3Make(translation.x, translation.y, translation.z)
         self.sceneView.scene.rootNode.addChildNode(self.node)
     }
@@ -91,7 +93,9 @@ class ARKitController: UIViewController {
             } else {
                 newScale = SCNVector3(gesture.scale, gesture.scale, gesture.scale)
             }
+
             node.scale = newScale
+            updateDimensionLabels()
         default:
             break
         }
@@ -105,9 +109,9 @@ class ARKitController: UIViewController {
     @objc func didRotate(_ gesture: UIRotationGestureRecognizer) {
         switch gesture.state {
         case .changed:
-            self.node.eulerAngles.y = self.lastRotation + Float(gesture.rotation)
+            self.node.eulerAngles.y = self.lastRotation - Float(gesture.rotation)
         case .ended:
-            self.lastRotation += Float(gesture.rotation)
+            self.lastRotation -= Float(gesture.rotation)
         default:
             break
         }
@@ -128,13 +132,27 @@ class ARKitController: UIViewController {
         }
 
         let translation = result.worldTransform.translation
-        guard let node = self.node else {
-            self.addBox(x: translation.x, y: translation.y, z: translation.z)
-            return
-        }
+        guard let node = self.node else { return }
 
         node.position = SCNVector3Make(translation.x, translation.y, translation.z)
         self.sceneView.scene.rootNode.addChildNode(self.node)
+    }
+
+    private func updateDimensionLabels() -> Void {
+        widthLabel.text = getDimensionText("Width", node.width, node.scale.x)
+        heightLabel.text = getDimensionText("Height", node.height, node.scale.y)
+        depthLabel.text = getDimensionText("Depth", node.depth, node.scale.z)
+    }
+
+    private func getDimensionText(_ text: String, _ size: CGFloat, _ scale: Float) -> String {
+        return "\(text): \((Float(size) * scale).rounded(toPlaces: 2))m";
+    }
+}
+
+extension Float {
+    func rounded(toPlaces places:Int) -> Float {
+        let divisor = pow(10.0, Float(places))
+        return (self * divisor).rounded() / divisor
     }
 }
 
@@ -143,4 +161,10 @@ extension float4x4 {
         let translation = self.columns.3
         return SIMD3(translation.x, translation.y, translation.z)
     }
+}
+
+extension SCNNode {
+    var height: CGFloat { CGFloat(self.boundingBox.max.y - self.boundingBox.min.y) }
+    var width: CGFloat { CGFloat(self.boundingBox.max.x - self.boundingBox.min.x) }
+    var depth: CGFloat { CGFloat(self.boundingBox.max.z - self.boundingBox.min.z) }
 }
