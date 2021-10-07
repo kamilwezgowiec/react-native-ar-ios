@@ -4,7 +4,8 @@ import ARKit
 class ARKitController: UIViewController {
     //MARK: - IBOutlets
     @IBOutlet weak var sceneView: ARSCNView!
-
+    @IBOutlet weak var spawnLabel: UILabel!
+  
     //MARK: - Variables
     private let configuration = ARWorldTrackingConfiguration()
     private var node: SCNNode!
@@ -61,6 +62,8 @@ class ARKitController: UIViewController {
         let translation = result.worldTransform.translation
 
         guard let node = self.node else {
+            spawnLabel.isHidden = true
+          
             self.addBox(x: translation.x, y: translation.y, z: translation.z)
             return
         }
